@@ -4,7 +4,7 @@
     <meta content="text/html; charset=utf-8" http-equiv="content-type">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <title>欢迎到 openLCA</title>
-    <link href="../libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <style type="text/css">
         body {
             min-width: 850px;
@@ -137,13 +137,13 @@
 	          <tr>
 	            <td>
 	              <p class="description">高性能生命周期评价和可持续性评价软件. 真的是开源.</p>
-	              <p class="description">可用免费. 自从 2006, 由 GreenDelta 创造的和维护的. <a onclick="callOpenUrl('http://www.greendelta.com')" class="subtle-link" target="blank" class="btn btn-default">www.greendelta.com</a></p>
+	              <p class="description">可用免费. 自从 2006, 由 GreenDelta 创造的和维护的. <a onclick="callOpenUrl('http://www.greendelta.com')" target="blank" class="subtle-link">www.greendelta.com</a></p>
 	            </td>
 	          </tr>
 	          <tr>
 	            <td>
 	              <div id="gd-logo"></div>
-	              <p class="description">许可证: Mozilla Public License (<a onclick="callOpenUrl('www.openlca.org/open-source')" target="blank" class="btn btn-default">是什么意思吗?</a>).</p></td>                  
+	              <p class="description">许可证: Mozilla Public License (<a onclick="callOpenUrl('www.openlca.org/open-source')" target="blank" class="btn btn-default">是什么意思吗?</a>).</p>                  
 	            </td>
 	          </tr>
 	        </tbody>
@@ -211,8 +211,8 @@
 		    </div>
 		</div>
 
-        <script src="../libs/jquery.min_1.9.0.js"></script>
-        <script src="../libs/angular.min.js"></script>
+        <script src="libs/jquery.min.js"></script>
+        <script src="libs/angular.min.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
                 $('#gd-logo').on('click', function() {
@@ -240,9 +240,9 @@
             // host editor in openLCA
 
             function callOpenUrl(url) {
-                if(typeof(openUrl) == "function") {
+                if(typeof(openUrl) === "function") {
                     openUrl(url);
-                } else if (typeof(console) != "undefined") {
+                } else if (typeof(console) !== "undefined") {
                     console.log("could not open " + url + "; openUrl is not a function");
                 }
             }
