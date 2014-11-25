@@ -1,4 +1,5 @@
 import codecs
+import re
 
 
 def read_file(path):
@@ -27,3 +28,22 @@ def check_file(translated_file, default_file):
     for key in translations:
         if key not in defaults:
             print("  %s: should be removed" % key)
+
+
+def suggest_key(message):
+    """
+    Suggests a key for the given message.
+    :type message: str
+    """
+    stopwords = []
+    with open('stopwords.txt', 'r') as f:
+        for word in f:
+            stopwords.append(word.strip().lower())
+    key = ""
+    for m in message.split(' '):
+        part = m.strip().lower()
+        if part in stopwords:
+            continue
+        key += part[0].upper() + part[1:]
+    key = re.sub('[^A-Za-z]', '', key)
+    return key
