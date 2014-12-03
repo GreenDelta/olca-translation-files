@@ -1,6 +1,7 @@
 import codecs
 import re
 import os
+import difflib
 
 
 stopwords = ["a", "a's", "able", "about", "above", "according", "accordingly",
@@ -162,6 +163,30 @@ def print_java_fields(messages):
         print("\tpublic static String %s;" % key)
 
 
+def find_key(value, message_file):
+    """
+    Searches for a key in the given message file with a value assigned that is
+    equal or similar to the given value.
+    """
+    messages = read_message_file(message_file)
+    candidate = None
+    similarity = 0
+    for k in messages:
+        if value == messages[k]:
+            print("found direct match: key=%s value=%s" % (k, value))
+            return
+        r = difflib.SequenceMatcher(None, value, messages[k]).ratio()
+        if r > similarity:
+            candidate = k
+            similarity = r
+    if candidate is not None:
+        print("did not found a direct match for '%s'" % value)
+        print(" possible alternative (similarity ratio = %s)" % similarity)
+        print(" %s = %s " % (candidate, messages[candidate]))
+    else:
+        print("did not found a key for %s" % value)
+
+
 def suggest_key(message):
     """
     Suggests a key for the given message.
@@ -205,6 +230,9 @@ def _find_strings_in_file(folder, file_name):
 
 
 def find_string_value(app_dir, value):
+    """
+    Searches for the given string value in the code base.
+    """
     for root, dirs, files in os.walk(app_dir):
         for file_name in files:
             if not file_name.endswith(('.java', '.html')):
@@ -214,9 +242,11 @@ def find_string_value(app_dir, value):
                 i = 0
                 for line in f:
                     i += 1
-                    if ('"@%s"' % value) in line:
+                    if value in line:
                         uri = path.replace('\\', '/')
                         print("found at: %s:%s" % (uri, i))
+                        print("   ... %s ..." % line.strip())
+                        print()
 
 
 
