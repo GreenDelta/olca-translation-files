@@ -187,20 +187,36 @@ def find_string_candidates(app_dir):
                 _find_strings_in_file(root, f)
 
 
-def _find_strings_in_file(dir, file_name):
+def _find_strings_in_file(folder, file_name):
     p = re.compile('"@(.*)"')
-    path = os.path.join(dir, file_name)
+    path = os.path.join(folder, file_name)
     with open(path, 'r', encoding='utf-8') as f:
         i = 0
         for line in f:
+            i += 1
             r = p.search(line)
             if r is not None:
                 message = r.group(1)
-                print("found '%s' in %s line %s:" % (message,file_name, i))
+                print("found '%s' in %s line %s:" % (message, file_name, i))
                 print("  proposed message entry:")
                 key = suggest_key(message)
                 print("  %s=%s" % (key, message))
                 print("\n")
-            i += 1
+
+
+def find_string_value(app_dir, value):
+    for root, dirs, files in os.walk(app_dir):
+        for file_name in files:
+            if not file_name.endswith(('.java', '.html')):
+                continue
+            path = os.path.join(root, file_name)
+            with open(path, 'r', encoding='utf-8') as f:
+                i = 0
+                for line in f:
+                    i += 1
+                    if ('"@%s"' % value) in line:
+                        uri = path.replace('\\', '/')
+                        print("found at: %s:%s" % (uri, i))
+
 
 
