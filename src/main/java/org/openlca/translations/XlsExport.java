@@ -130,7 +130,5 @@ public class XlsExport {
 			System.out.println("Export language: " + code);
 			XlsExport.write(code);
 		}
-
-
 	}
 }
