@@ -2,6 +2,8 @@ package org.openlca.translations;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.TreeSet;
 
@@ -18,7 +20,6 @@ public class XlsExport {
 
 	public static void write(String lang) {
 		new XlsExport(lang).run();
-		;
 	}
 
 	private void run() {
@@ -34,6 +35,7 @@ public class XlsExport {
 			appMessages.writeTo(appSheet);
 			var bundleSheet = wb.createSheet("bundle-messages");
 			bundleMessages.writeTo(bundleSheet);
+			Files.createDirectories(Path.of("outbox"));
 			var file = new File("outbox/olca-translations_" + lang + ".xlsx");
 			try (var stream = new FileOutputStream(file)) {
 				wb.write(stream);
@@ -105,6 +107,30 @@ public class XlsExport {
 	}
 
 	static void main() {
-		XlsExport.write("zh_cn");
+
+		var files = new File("app-messages").listFiles();
+		if (files == null) {
+			System.out.println("No translation files found");
+			return;
+		}
+
+		var codes = new TreeSet<String>();
+		codes.add("en");
+		for (var f : files) {
+			var pos = f.getName().indexOf('_');
+			if (pos < 0)
+				continue;
+			var code = f.getName()
+				.substring(pos + 1)
+				.replace(".properties", "");
+			codes.add(code);
+		}
+
+		for (var code : codes) {
+			System.out.println("Export language: " + code);
+			XlsExport.write(code);
+		}
+
+
 	}
 }
