@@ -10,51 +10,101 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class XlsExport {
 
-	/**
-	 * Writes the translations of the given language to an Excel file. The file
-	 * has two sheets (messages and bundles) where each entry is written in the
-	 * following format: the key (prefixed with a hash), the English text, the
-	 * translation, and an empty row.
-	 */
+	private final String lang;
+
+	private XlsExport(String lang) {
+		this.lang = lang;
+	}
+
 	public static void write(String lang) {
-		try (var workbook = new XSSFWorkbook()) {
-			writeSheet(workbook.createSheet("messages"),
-				"app-messages", "messages", lang);
-			writeSheet(workbook.createSheet("bundles"),
-				"bundle-messages", "bundle", lang);
+		new XlsExport(lang).run();
+		;
+	}
+
+	private void run() {
+		var appMessages = appMessages();
+		if (appMessages == null)
+			return;
+		var bundleMessages = bundleMessages();
+		if (bundleMessages == null)
+			return;
+
+		try (var wb = new XSSFWorkbook()) {
+			var appSheet = wb.createSheet("app-messages");
+			appMessages.writeTo(appSheet);
+			var bundleSheet = wb.createSheet("bundle-messages");
+			bundleMessages.writeTo(bundleSheet);
 			var file = new File("outbox/olca-translations_" + lang + ".xlsx");
 			try (var stream = new FileOutputStream(file)) {
-				workbook.write(stream);
+				wb.write(stream);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private static void writeSheet(Sheet sheet, String dir,
-		String base, String lang) {
-		var defaults = Props.read(new File(dir, base + ".properties"));
-		var translatedFile = new File(dir, base + "_" + lang + ".properties");
-		var translated = translatedFile.exists()
-			? Props.read(translatedFile)
-			: new Properties();
-		int rowIndex = 0;
-		var keys = new TreeSet<>(defaults.stringPropertyNames());
-		for (var key : keys) {
-			var row = sheet.createRow(rowIndex++);
-			row.createCell(1).setCellValue("#" + key);
-			row = sheet.createRow(rowIndex++);
-			row.createCell(1).setCellValue(defaults.getProperty(key));
-			row = sheet.createRow(rowIndex++);
-			row.createCell(0).setCellValue(lang);
-			row.createCell(1).setCellValue(translated.getProperty(key, ""));
-			rowIndex++;
+	private Trans appMessages() {
+		var enFile = new File("app-messages/messages.properties");
+		if (!enFile.exists()) {
+			System.out.println("English translation is missing");
+			return null;
 		}
-		sheet.autoSizeColumn(0);
-		sheet.setColumnWidth(1, 100 * 256);
+		var english = Props.read(enFile);
+		if (lang.equals("en"))
+			return new Trans(lang, english, english);
+
+		var langFile = new File("app-messages/messages_" + lang + ".properties");
+		if (!langFile.exists()) {
+			System.out.println("No messages found for language: " + lang);
+			return null;
+		}
+
+		var translated = Props.read(langFile);
+		return new Trans(lang, english, translated);
+	}
+
+	private Trans bundleMessages() {
+		var enFile = new File("bundle-messages/bundle.properties");
+		if (!enFile.exists()) {
+			System.out.println("English bundle translation is missing");
+			return null;
+		}
+		var english = Props.read(enFile);
+		if (lang.equals("en"))
+			return new Trans(lang, english, english);
+
+		var langFile = new File("bundle-messages/bundle_" + lang + ".properties");
+		if (!langFile.exists())
+			return new Trans(lang, english, new Properties());
+
+		var translated = Props.read(langFile);
+		return new Trans(lang, english, translated);
+	}
+
+	private record Trans(
+		String lang, Properties english, Properties translated
+	) {
+
+		void writeTo(Sheet sheet) {
+			int i = 0;
+			var keys = new TreeSet<>(english.stringPropertyNames());
+			for (var key : keys) {
+				var row = sheet.createRow(i++);
+				row.createCell(1).setCellValue("#" + key);
+				row = sheet.createRow(i++);
+				row.createCell(1).setCellValue(english.getProperty(key));
+				row = sheet.createRow(i++);
+				row.createCell(0).setCellValue(lang);
+				row.createCell(1).setCellValue(translated.getProperty(key, ""));
+				i++;
+			}
+			sheet.autoSizeColumn(0);
+			sheet.setColumnWidth(1, 100 * 256);
+		}
+
 	}
 
 	static void main() {
-		XlsExport.write("ar");
+		XlsExport.write("zh_cn");
 	}
 }
