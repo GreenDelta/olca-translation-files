@@ -6,7 +6,6 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class XlsExport {
@@ -52,9 +51,10 @@ public class XlsExport {
 			rowIndex++;
 		}
 		sheet.autoSizeColumn(0);
+		sheet.setColumnWidth(1, 100 * 256);
 	}
 
 	static void main() {
-		XlsExport.write("fr");
+		XlsExport.write("ar");
 	}
 }
