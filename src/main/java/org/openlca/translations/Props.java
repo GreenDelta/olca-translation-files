@@ -44,19 +44,21 @@ class Props {
 
 		@Override
 		public Enumeration<Object> keys() {
-			return Collections.enumeration(new TreeSet<>(keySet()));
+			var sorted = new TreeSet<>(
+				(a, b) -> a.toString().compareToIgnoreCase(b.toString())
+			);
+			sorted.addAll(keySet());
+			return Collections.enumeration(sorted);
 		}
 
 		@Override
 		public Set<Entry<Object, Object>> entrySet() {
 			Set<Map.Entry<Object, Object>> sorted = new TreeSet<>(
-				Comparator.comparing(e -> e.getKey().toString())
+				Comparator.comparing(
+					e -> e.getKey().toString(), String.CASE_INSENSITIVE_ORDER)
 			);
 			sorted.addAll(super.entrySet());
 			return sorted;
 		}
 	}
-
-
-
 }
